@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ATH034 {
+  id        Int       @id @default(autoincrement())
+  date_time DateTime? @default(now()) @db.Time(6)
+  analog1   Decimal?  @db.Decimal
+  analog2   Decimal?  @db.Decimal
+  digital1  Decimal?  @db.Decimal
+  digital2  Decimal?  @db.Decimal
+}
+
+model NRD012 {
+  ID       Int       @id @default(autoincrement())
+  Date     DateTime? @default(now()) @db.Timestamp(6)
+  Analog1  String?   @db.VarChar(20)
+  Analog2  String?   @db.VarChar(20)
+  Digital1 String?   @db.VarChar(10)
+  Digital2 String?   @db.VarChar(10)
+}
+
+model PHU021 {
+  ID       Int       @id @default(autoincrement())
+  Date     DateTime? @default(now()) @db.Timestamp(6)
+  Analog1  String?   @db.VarChar(10)
+  Analog2  String?   @db.VarChar(10)
+  Digital1 String?   @db.VarChar(10)
+  Digital2 String?   @db.VarChar(10)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model PN014 {
+  ID       BigInt    @default(autoincrement())
+  Date     DateTime? @db.Timestamp(6)
+  Analog1  String?   @db.VarChar(10)
+  Analog2  String?   @db.VarChar(10)
+  Digital1 String?   @db.VarChar
+  Digital2 String?   @db.VarChar
+
+  @@ignore
+}
