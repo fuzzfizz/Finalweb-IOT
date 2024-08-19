@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ATH034 } from "@prisma/client";
+import type { ATH034 } from "@prisma/client";
 import API from "@/libs/API";
 
 export default function Page() {
