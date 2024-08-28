@@ -8,21 +8,23 @@ datasource db {
 }
 
 model ATH034 {
-  id        Int       @id @default(autoincrement())
-  date_time DateTime? @default(now()) @db.Time(6)
-  analog1   Decimal?  @db.Decimal
-  analog2   Decimal?  @db.Decimal
-  digital1  Decimal?  @db.Decimal
-  digital2  Decimal?  @db.Decimal
+  id           Int       @id @default(autoincrement())
+  date_time    DateTime? @default(now()) @db.Time(6)
+  mq2_value    Decimal?  @db.Decimal(10, 0)
+  rgb_status   String?   @db.VarChar(10)
+  buzzer_value Decimal?  @db.Decimal(10, 0)
+  flame_status Decimal?  @db.Decimal(10, 0)
 }
 
 model NRD012 {
-  ID       Int       @id @default(autoincrement())
-  Date     DateTime? @default(now()) @db.Timestamp(6)
-  Analog1  String?   @db.VarChar(20)
-  Analog2  String?   @db.VarChar(20)
-  Digital1 String?   @db.VarChar(10)
-  Digital2 String?   @db.VarChar(10)
+  id       Int       @id @default(autoincrement())
+  ldr      Int?
+  vr       Int?
+  temp     Decimal?  @db.Decimal
+  distance Decimal?  @db.Decimal
+  date     DateTime? @default(now()) @db.Timestamp(6)
+  command  String?   @db.VarChar(10)
+  mode     Decimal?  @db.Decimal
 }
 
 model PHU021 {
@@ -34,14 +36,100 @@ model PHU021 {
   Digital2 String?   @db.VarChar(10)
 }
 
+model CCW043 {
+  id                 Int       @id @default(autoincrement())
+  red                Decimal?  @db.Decimal
+  green              Decimal?  @db.Decimal
+  blue               Decimal?  @db.Decimal
+  mode               Decimal?  @db.Decimal
+  status_led         String?   @db.VarChar
+  neo_pixel_duration Decimal?  @db.Decimal
+  updated            DateTime? @default(now()) @db.Timestamp(6)
+}
+
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model PN014 {
-  ID       BigInt    @default(autoincrement())
-  Date     DateTime? @db.Timestamp(6)
-  Analog1  String?   @db.VarChar(10)
-  Analog2  String?   @db.VarChar(10)
-  Digital1 String?   @db.VarChar
-  Digital2 String?   @db.VarChar
+model CNS075 {
+  id        Int
+  date_Time DateTime? @default(now()) @map("date Time") @db.Time(6)
 
   @@ignore
 }
+
+model PHUW022 {
+  id               Int      @id(map: "led_states_pkey") @default(autoincrement())
+  lux              Decimal? @db.Decimal
+  temperature      Decimal? @db.Decimal
+  raindrop_status  String?  @db.VarChar
+  raindrop_value   Decimal? @db.Decimal
+  vibration_status String?  @db.VarChar
+  timestamp        DateTime @default(now()) @db.Timestamptz(6)
+  command          String?  @db.VarChar
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model TR000 {
+  id         Int       @default(autoincrement())
+  ldr        Decimal?  @db.Decimal(5, 2)
+  vr         Decimal?  @db.Decimal(5, 2)
+  temp       Decimal?  @db.Decimal(5, 2)
+  distance   Decimal?  @db.Decimal(5, 2)
+  updated    DateTime? @default(now()) @db.Timestamp(6)
+  status_led String?   @db.VarChar(5)
+  red        Decimal?  @db.Decimal
+  green      Decimal?  @db.Decimal
+  blue       Decimal?  @db.Decimal
+  mode       Decimal?  @db.Decimal
+
+  @@ignore
+}
+
+model TSN008 {
+  id            Int  @id @default(autoincrement())
+  tbl_smoke     Int?
+  tbl_ldr       Int?
+  tbl_vibration Int?
+  tbl_led       Int?
+}
+
+model WRP025 {
+  id        Int       @id @default(autoincrement())
+  digital1  Int?
+  digital2  Decimal?  @db.Decimal
+  analog1   Decimal?  @db.Decimal
+  analog2   Decimal?  @db.Decimal
+  timestamp DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model cyd000 {
+  id    Int    @id @default(autoincrement())
+  type  String @db.VarChar(50)
+  value Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model pn014 {
+  id          BigInt    @default(autoincrement())
+  date        DateTime? @default(now()) @db.Timestamp(6)
+  temperature String?   @db.VarChar(10)
+  humidity    String?   @db.VarChar(10)
+  red         String?   @db.VarChar(10)
+  green       String?   @db.VarChar(10)
+
+  @@ignore
+}
+
+model sensor_data {
+  id        Int       @id @default(autoincrement())
+  sensor    String?   @db.VarChar(50)
+  status    String?   @db.VarChar(50)
+  timestamp DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model tbl_users {
+  id   BigInt  @id
+  name String? @db.Char
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model mongkol023 {
+// }

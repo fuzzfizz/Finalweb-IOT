@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { ATH034 } from "@prisma/client";
 import API from "@/libs/API";
+import io from "socket.io-client";
+import Decimal from "decimal.js";
 
 export default function Page() {
   const [sensorData, setSensorData] = useState<ATH034[]>([]);
@@ -9,7 +11,7 @@ export default function Page() {
 
   async function getAllData() {
     try {
-      const res = await API.get("/api/iot");
+      const res = await API.get("/api/fetch");
       setSensorData(res.data.result);
       console.log(res.data.result);
     } catch (error) {
@@ -19,7 +21,7 @@ export default function Page() {
 
   async function getRecentData() {
     try {
-      const res = await API.get("/api/fetchrecent");
+      const res = await API.get("/api/fetch");
       setRecentData(res.data.result);
       console.log(res.data.result);
     } catch (error) {
@@ -27,10 +29,9 @@ export default function Page() {
     }
   }
 
-  // รับค่า id จาก button แล้วลบข้อมูลใน database ที่มี id ตรงกับค่าที่รับมา
-  async function handleDel(id: string) {
+  async function handleDel(id: number) {
     try {
-      const res = await API.delete(`/api/iot`, {
+      const res = await API.delete(`/api/iot/get`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -45,35 +46,52 @@ export default function Page() {
 
   useEffect(() => {
     getAllData();
-    getRecentData();
+    const socket = new WebSocket("ws://192.168.34.4/sensors");
+
+    socket.onmessage = function (event: MessageEvent) {
+      const data = JSON.parse(event.data);
+      // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
+      const formattedData: ATH034 = {
+        id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
+        flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
+        mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
+        rgb_status: data.flame === 0 ? "red" : "green",
+        buzzer_value: new Decimal(0), // แปลงค่าเป็น Decimal
+        date_time: new Date(),
+      };
+      setRecentData([formattedData]);
+      console.log("Received recent update:", data);
+    };
   }, []);
 
   return (
     <div className="min-h-screen p-4">
       <h1 className="text-2xl font-bold mb-4">Sensor Dashboard</h1>
-      {recentData.length > 0 && (
-        <div
-          key={recentData[0].id}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-gray-700"
-        >
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">Analog1</h2>
-            <p>{recentData[0].analog1?.toString()}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">Analog2</h2>
-            <p>{recentData[0].analog2?.toString()}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">Digital1</h2>
-            <p>{recentData[0].digital1?.toString()}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">Digital2</h2>
-            <p>{recentData[0].digital2?.toString()}</p>
-          </div>
+      <div
+        key={recentData[0]?.id}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-gray-700"
+      >
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">flame_status</h2>
+          <p>
+            {recentData[0]?.flame_status?.toString() || "No data available"}
+          </p>
         </div>
-      )}
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">mq2_value</h2>
+          <p>{recentData[0]?.mq2_value?.toString() || "No data available"}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">rgb_status</h2>
+          <p>{recentData[0]?.rgb_status?.toString() || "No data available"}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">buzzer_value</h2>
+          <p>
+            {recentData[0]?.buzzer_value?.toString() || "No data available"}
+          </p>
+        </div>
+      </div>
       <div className="bg-white p-4 rounded shadow text-black">
         <h2 className="text-xl font-semibold mb-4">Historical Data</h2>
         <div className="overflow-x-auto">
@@ -91,27 +109,29 @@ export default function Page() {
             </thead>
             <tbody>
               {sensorData.map((data) => (
-                <tr key={data.id}>
+                <tr key={data?.id}>
                   <td className="py-2 px-4 border-b">{data.id}</td>
                   <td className="py-2 px-4 border-b">
-                    {data.analog1?.toString()}
+                    {data?.flame_status?.toString() || "No data available"}
                   </td>
                   <td className="py-2 px-4 border-b">
-                    {data.analog2?.toString()}
+                    {data?.mq2_value?.toString()}
                   </td>
                   <td className="py-2 px-4 border-b">
-                    {data.digital1?.toString()}
+                    {data?.rgb_status?.toString()}
                   </td>
                   <td className="py-2 px-4 border-b">
-                    {data.digital2?.toString()}
+                    {data?.buzzer_value?.toString()}
                   </td>
                   <td className="py-2 px-4 border-b">
-                    {data.date_time?.toString()}
+                    {data?.date_time
+                      ? new Date(data.date_time).toLocaleString("th-TH")
+                      : ""}
                   </td>
                   <td className="py-2 px-4 border-b">
                     <button
                       className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                      onClick={() => handleDel(data.id.toString())}
+                      onClick={() => handleDel(data.id)}
                     >
                       Delete
                     </button>

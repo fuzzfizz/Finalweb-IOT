@@ -129,19 +129,7 @@ const Home = () => {
               <h3 className="text-xl font-semibold mb-2">LDR Data Graph</h3>
               <Line data={createChartData("LDR Data", ldrData)} />
             </div>
-            {/* Rain Sensor Data Graph */}
-            <div
-              className={`p-4 rounded-lg shadow-md transition-colors duration-500 ${
-                isRainDetected
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-800"
-              }`}
-            >
-              <h3 className="text-xl font-semibold mb-2">
-                Rain Sensor Data Graph
-              </h3>
-              <Line data={createChartData("Rain Sensor Data", rainData)} />
-            </div>
+
             {/* Flame Sensor Data Graph */}
             <div
               className={`p-4 rounded-lg shadow-md transition-colors duration-500 ${
