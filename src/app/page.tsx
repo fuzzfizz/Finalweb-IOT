@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { ATH034 } from "@prisma/client";
 import API from "@/libs/API";
-import io from "socket.io-client";
 import Decimal from "decimal.js";
 
 export default function Page() {
@@ -46,15 +45,14 @@ export default function Page() {
 
   useEffect(() => {
     getAllData();
-    const socket = new WebSocket(
-      "ws://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
-    );
 
-    fetch("http://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/")
+    fetch(
+      "https://f4e5-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/"
+    )
       .then(() => {
         // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
         const socket = new WebSocket(
-          "wss://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
+          "ws://f4e5-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
         );
 
         socket.onmessage = function (event: MessageEvent) {
