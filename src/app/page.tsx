@@ -54,7 +54,7 @@ export default function Page() {
       .then(() => {
         // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
         const socket = new WebSocket(
-          "ws://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
+          "wss://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
         );
 
         socket.onmessage = function (event: MessageEvent) {
