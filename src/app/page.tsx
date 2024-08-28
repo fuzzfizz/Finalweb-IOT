@@ -46,22 +46,35 @@ export default function Page() {
 
   useEffect(() => {
     getAllData();
-    const socket = new WebSocket("ws://192.168.34.4/sensors");
+    const socket = new WebSocket(
+      "ws://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
+    );
 
-    socket.onmessage = function (event: MessageEvent) {
-      const data = JSON.parse(event.data);
-      // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
-      const formattedData: ATH034 = {
-        id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
-        flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
-        mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
-        rgb_status: data.flame === 0 ? "red" : "green",
-        buzzer_value: new Decimal(0), // แปลงค่าเป็น Decimal
-        date_time: new Date(),
-      };
-      setRecentData([formattedData]);
-      console.log("Received recent update:", data);
-    };
+    fetch("http://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/")
+      .then(() => {
+        // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
+        const socket = new WebSocket(
+          "ws://eb26-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
+        );
+
+        socket.onmessage = function (event: MessageEvent) {
+          const data = JSON.parse(event.data);
+          // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
+          const formattedData: ATH034 = {
+            id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
+            flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
+            mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
+            rgb_status: data.flame === 0 ? "red" : "green",
+            buzzer_value: new Decimal(0), // แปลงค่าเป็น Decimal
+            date_time: new Date(),
+          };
+          setRecentData([formattedData]);
+          console.log("Received recent update:", data);
+        };
+      })
+      .catch((error) => {
+        console.error("Error connecting to the server:", error);
+      });
   }, []);
 
   return (
