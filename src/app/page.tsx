@@ -43,15 +43,19 @@ export default function Page() {
     }
   }
 
-  useEffect(() => {
-    getAllData();
-
-    fetch("https://6207-2001-44c8-45d0-ac46-5d6b-265-84bf-96c9.ngrok-free.app/")
+  async function fetchData() {
+    await fetch(
+      "https://0e2b-2001-44c8-45d0-ac46-acd5-45cc-f0-d156.ngrok-free.app"
+    )
       .then(() => {
         // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
         const socket = new WebSocket(
-          "wss://6207-2001-44c8-45d0-ac46-5d6b-265-84bf-96c9.ngrok-free.app/sensors"
+          "wss://0e2b-2001-44c8-45d0-ac46-acd5-45cc-f0-d156.ngrok-free.app/sensors"
         );
+
+        socket.onopen = () => {
+          console.log("WebSocket connection established");
+        };
 
         socket.onmessage = function (event: MessageEvent) {
           const data = JSON.parse(
@@ -69,10 +73,23 @@ export default function Page() {
           setRecentData([formattedData]);
           console.log("Received recent update:", data);
         };
+
+        socket.onerror = (error) => {
+          console.error("WebSocket error:", error);
+        };
+
+        socket.onclose = () => {
+          console.log("WebSocket connection closed");
+        };
       })
       .catch((error) => {
         console.error("Error connecting to the server:", error);
       });
+  }
+
+  useEffect(() => {
+    fetchData();
+    getAllData();
   }, []);
 
   return (
