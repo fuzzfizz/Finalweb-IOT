@@ -30,7 +30,7 @@ export default function Page() {
 
   async function handleDel(id: number) {
     try {
-      const res = await API.delete(`/api/delete`, {
+      const res = await API.delete(`/api/iot/get`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -54,14 +54,16 @@ export default function Page() {
         );
 
         socket.onmessage = function (event: MessageEvent) {
-          const data = JSON.parse(event.data);
+          const data = JSON.parse(
+            event.data.replace(/"rgb":\s*(\w+)/g, '"rgb": "$1"')
+          );
           // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
           const formattedData: ATH034 = {
             id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
             flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
             mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
             rgb_status: data.flame === 0 ? "red" : "green",
-            buzzer_value: new Decimal(0), // แปลงค่าเป็น Decimal
+            buzzer_value: new Decimal(data.buzzer), // แปลงค่าเป็น Decimal
             date_time: new Date(),
           };
           setRecentData([formattedData]);
@@ -108,10 +110,10 @@ export default function Page() {
             <thead>
               <tr>
                 <th className="py-2 px-4 border-b">ID</th>
-                <th className="py-2 px-4 border-b">Analog1</th>
-                <th className="py-2 px-4 border-b">Analog2</th>
-                <th className="py-2 px-4 border-b">Digital1</th>
-                <th className="py-2 px-4 border-b">Digital2</th>
+                <th className="py-2 px-4 border-b">flame_status</th>
+                <th className="py-2 px-4 border-b">mq2_value</th>
+                <th className="py-2 px-4 border-b">rgb_status</th>
+                <th className="py-2 px-4 border-b">buzzer_value</th>
                 <th className="py-2 px-4 border-b">Date</th>
                 <th className="py-2 px-4 border-b">Delete</th>
               </tr>
