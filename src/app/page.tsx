@@ -30,7 +30,7 @@ export default function Page() {
 
   async function handleDel(id: number) {
     try {
-      const res = await API.delete(`/api/iot/get`, {
+      const res = await API.delete(`/api/delete`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -46,13 +46,11 @@ export default function Page() {
   useEffect(() => {
     getAllData();
 
-    fetch(
-      "https://f4e5-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/"
-    )
+    fetch("https://6207-2001-44c8-45d0-ac46-5d6b-265-84bf-96c9.ngrok-free.app/")
       .then(() => {
         // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
         const socket = new WebSocket(
-          "wss://f4e5-2001-44c8-45d0-ac46-81c0-3f8d-4978-168c.ngrok-free.app/sensors"
+          "wss://6207-2001-44c8-45d0-ac46-5d6b-265-84bf-96c9.ngrok-free.app/sensors"
         );
 
         socket.onmessage = function (event: MessageEvent) {
