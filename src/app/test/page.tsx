@@ -1,215 +1,394 @@
+/**
+ * v0 by Vercel.
+ * @see https://v0.dev/t/HAuKTSGJrH0
+ * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
+ */
 "use client";
-import { useState, useEffect } from "react";
-import { Line } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-} from "chart.js";
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { ResponsiveLine } from "@nivo/line";
+import { JSX, SVGProps, ClassAttributes, HTMLAttributes } from "react";
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement);
-
-interface SensorData {
-  ldrData: number[];
-  rainData: number[];
-  flameData: number[];
-  labels: string[];
-  tableData: {
-    Timestamp: string;
-    LDR: number;
-    RainSensor: number;
-    FlameSensor: number;
-  }[];
-}
-
-const Home = () => {
-  const [ldrData, setLdrData] = useState<number[]>([]);
-  const [rainData, setRainData] = useState<number[]>([]);
-  const [flameData, setFlameData] = useState<number[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [tableData, setTableData] = useState<SensorData["tableData"]>([]);
-  const [isFireDetected, setIsFireDetected] = useState<boolean>(false);
-  const [isRainDetected, setIsRainDetected] = useState<boolean>(false);
-
-  const [rgbColor, setRgbColor] = useState<string>("");
-
-  useEffect(() => {
-    // Simulate data fetching
-    const fetchData = async () => {
-      const ldrData = [300, 400, 500, 600];
-      const rainData = [3, 3, 3, 6];
-      const flameData = [0, 0, 0, 1];
-      const labels = ["08:00", "09:00", "10:00", "11:00"];
-      const tableData = [
-        {
-          Timestamp: "2024-08-20 08:00:00",
-          LDR: 300,
-          RainSensor: 5,
-          FlameSensor: 0,
-        },
-        {
-          Timestamp: "2024-08-20 09:00:00",
-          LDR: 400,
-          RainSensor: 7,
-          FlameSensor: 1,
-        },
-        {
-          Timestamp: "2024-08-20 10:00:00",
-          LDR: 500,
-          RainSensor: 6,
-          FlameSensor: 0,
-        },
-        {
-          Timestamp: "2024-08-20 11:00:00",
-          LDR: 600,
-          RainSensor: 4,
-          FlameSensor: 1,
-        },
-      ];
-
-      setLdrData(ldrData);
-      setRainData(rainData);
-      setFlameData(flameData);
-      setLabels(labels);
-      setTableData(tableData);
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (flameData.length > 0) {
-      const latestFlameValue = flameData[flameData.length - 1];
-      setIsFireDetected(latestFlameValue > 0);
-    }
-  }, [flameData]);
-
-  useEffect(() => {
-    if (rainData.length > 0) {
-      const latestRainValue = rainData[rainData.length - 1];
-      setIsRainDetected(latestRainValue > 5); // Example threshold for rain detection
-    }
-  }, [rainData]);
-
-  const createChartData = (title: string, data: number[]) => ({
-    labels,
-    datasets: [
-      {
-        label: title,
-        data,
-        borderColor: "#4F46E5",
-        backgroundColor: "rgba(79, 70, 229, 0.2)",
-      },
-    ],
-  });
-
-  const handleRgbChange = (color: string) => {
-    setRgbColor(color);
-    // Send color command to the server or hardware
-    console.log(`RGB Color set to: ${color}`);
-    // Example: fetch('/api/setRgbColor', { method: 'POST', body: JSON.stringify({ color }) });
-  };
-
+export default function Component() {
   return (
-    <div className="flex flex-col p-6 bg-black min-h-screen ">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold text-white">Sensor Dashboard</h1>
-      </header>
-
-      <main className="flex-1">
-        <section className="mb-6">
-          <h2 className="text-2xl font-semibold text-white mb-4">
-            Sensor Data Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LDR Data Graph */}
-            <div className="bg-white p-4 rounded-lg shadow-md text-black">
-              <h3 className="text-xl font-semibold mb-2">LDR Data Graph</h3>
-              <Line data={createChartData("LDR Data", ldrData)} />
-            </div>
-
-            {/* Flame Sensor Data Graph */}
-            <div
-              className={`p-4 rounded-lg shadow-md transition-colors duration-500 ${
-                isFireDetected
-                  ? "bg-red-500 text-white"
-                  : "bg-white text-gray-800"
-              }`}
+    <div className="flex flex-col min-h-screen w-full">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+        <div className="flex items-center gap-4">
+          <h1 className="font-semibold text-lg md:text-xl">Fire Alarm</h1>
+        </div>
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader
+              className={`${
+                true ? "bg-red-500 text-white" : "bg-green-500 text-white"
+              } p-4 sm:p-6`}
             >
-              <h3 className="text-xl font-semibold mb-2">
-                Flame Sensor Data Graph
-              </h3>
-              <Line data={createChartData("Flame Sensor Data", flameData)} />
-            </div>
-          </div>
-        </section>
-
-        <section className="text-black">
-          <h2 className="text-2xl font-semibold mb-4 text-white">
-            Sensor Data Table
-          </h2>
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b">Timestamp</th>
-                  <th className="py-2 px-4 border-b">LDR Value</th>
-                  <th className="py-2 px-4 border-b">Rain Sensor Value</th>
-                  <th className="py-2 px-4 border-b">Flame Sensor Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, index) => (
-                  <tr key={index}>
-                    <td className="py-2 px-4 border-b">{row.Timestamp}</td>
-                    <td className="py-2 px-4 border-b">{row.LDR}</td>
-                    <td className="py-2 px-4 border-b">{row.RainSensor}</td>
-                    <td className="py-2 px-4 border-b">{row.FlameSensor}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="mt-6">
-          <h2 className="text-2xl font-semibold mb-4 text-white">
-            RGB Control
-          </h2>
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <div className="flex gap-4">
-              <button
-                onClick={() => handleRgbChange("red")}
-                className="bg-red-500 text-white py-2 px-4 rounded"
-              >
-                Red
-              </button>
-              <button
-                onClick={() => handleRgbChange("green")}
-                className="bg-green-500 text-white py-2 px-4 rounded"
-              >
-                Green
-              </button>
-              <button
-                onClick={() => handleRgbChange("blue")}
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-              >
-                Blue
-              </button>
-              <button
-                onClick={() => handleRgbChange("white")}
-                className="bg-gray-500 text-white py-2 px-4 rounded"
-              >
-                White
-              </button>
-            </div>
-          </div>
-        </section>
+              <CardTitle>Fire Incident Detected</CardTitle>
+              <CardDescription>
+                <div className="flex items-center gap-2">
+                  <FlameIcon className="h-5 w-5 text-white" />
+                  <span>
+                    Fire detected at Acme Warehouse, 123 Main St. 15 minutes
+                    ago.
+                  </span>
+                </div>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              <div className="grid gap-4">
+                <div>
+                  <h3 className="text-lg font-medium">Smoke Sensor Data</h3>
+                  <TimeseriesChart className="aspect-[4/3]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">
+                    Current Smoke Sensor Reading
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <div className="text-4xl font-bold">450</div>
+                    <span className="text-muted-foreground">ppm</span>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">Volume Control</h3>
+                  <div className="flex items-center gap-2">
+                    <Slider
+                      id="volume"
+                      min={0}
+                      max={100}
+                      defaultValue={[50]}
+                      className="flex-1"
+                    />
+                    <Button type="submit">Submit</Button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">Recent Alerts</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>MQ2 Value</TableHead>
+                        <TableHead>Flame Status</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Delete</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>1</TableCell>
+                        <TableCell>450</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-red-500">
+                            <FlameIcon className="h-4 w-4" />
+                            <span>Active</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>2023-06-15 14:23</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>2</TableCell>
+                        <TableCell>320</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-green-500">
+                            <CheckIcon className="h-4 w-4" />
+                            <span>Resolved</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>2023-06-10 09:45</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>3</TableCell>
+                        <TableCell>480</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-red-500">
+                            <FlameIcon className="h-4 w-4" />
+                            <span>Active</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>2023-06-05 18:30</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2 p-4 sm:p-6">
+              <Button variant="outline">Respond</Button>
+              <Button>Report Incident</Button>
+            </CardFooter>
+          </Card>
+        </div>
       </main>
     </div>
   );
-};
+}
 
-export default Home;
+function CheckIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function FlameIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+    </svg>
+  );
+}
+
+function LineChart(
+  props: JSX.IntrinsicAttributes &
+    ClassAttributes<HTMLDivElement> &
+    HTMLAttributes<HTMLDivElement>
+) {
+  return (
+    <div {...props}>
+      <ResponsiveLine
+        data={[
+          {
+            id: "Desktop",
+            data: [
+              { x: "Jan", y: 43 },
+              { x: "Feb", y: 137 },
+              { x: "Mar", y: 61 },
+              { x: "Apr", y: 145 },
+              { x: "May", y: 26 },
+              { x: "Jun", y: 154 },
+            ],
+          },
+          {
+            id: "Mobile",
+            data: [
+              { x: "Jan", y: 60 },
+              { x: "Feb", y: 48 },
+              { x: "Mar", y: 177 },
+              { x: "Apr", y: 78 },
+              { x: "May", y: 96 },
+              { x: "Jun", y: 204 },
+            ],
+          },
+        ]}
+        margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
+        xScale={{
+          type: "point",
+        }}
+        yScale={{
+          type: "linear",
+        }}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 0,
+          tickPadding: 16,
+        }}
+        axisLeft={{
+          tickSize: 0,
+          tickValues: 5,
+          tickPadding: 16,
+        }}
+        colors={["#2563eb", "#e11d48"]}
+        pointSize={6}
+        useMesh={true}
+        gridYValues={6}
+        theme={{
+          tooltip: {
+            chip: {
+              borderRadius: "9999px",
+            },
+            container: {
+              fontSize: "12px",
+              textTransform: "capitalize",
+              borderRadius: "6px",
+            },
+          },
+          grid: {
+            line: {
+              stroke: "#f3f4f6",
+            },
+          },
+        }}
+        role="application"
+      />
+    </div>
+  );
+}
+
+function TimeseriesChart(
+  props: JSX.IntrinsicAttributes &
+    ClassAttributes<HTMLDivElement> &
+    HTMLAttributes<HTMLDivElement>
+) {
+  return (
+    <div {...props}>
+      <ResponsiveLine
+        data={[
+          {
+            id: "Desktop",
+            data: [
+              { x: "2018-01-01", y: 7 },
+              { x: "2018-01-02", y: 5 },
+              { x: "2018-01-03", y: 11 },
+              { x: "2018-01-04", y: 9 },
+              { x: "2018-01-05", y: 12 },
+              { x: "2018-01-06", y: 16 },
+              { x: "2018-01-07", y: 13 },
+            ],
+          },
+          {
+            id: "Mobile",
+            data: [
+              { x: "2018-01-01", y: 9 },
+              { x: "2018-01-02", y: 8 },
+              { x: "2018-01-03", y: 13 },
+              { x: "2018-01-04", y: 6 },
+              { x: "2018-01-05", y: 8 },
+              { x: "2018-01-06", y: 14 },
+              { x: "2018-01-07", y: 11 },
+            ],
+          },
+        ]}
+        margin={{ top: 10, right: 20, bottom: 40, left: 40 }}
+        xScale={{
+          type: "time",
+          format: "%Y-%m-%d",
+          useUTC: false,
+          precision: "day",
+        }}
+        xFormat="time:%Y-%m-%d"
+        yScale={{
+          type: "linear",
+          min: 0,
+          max: "auto",
+        }}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 0,
+          tickPadding: 16,
+          format: "%d",
+          tickValues: "every 1 day",
+        }}
+        axisLeft={{
+          tickSize: 0,
+          tickValues: 5,
+          tickPadding: 16,
+        }}
+        colors={["#2563eb", "#e11d48"]}
+        pointSize={6}
+        useMesh={true}
+        gridYValues={6}
+        theme={{
+          tooltip: {
+            chip: {
+              borderRadius: "9999px",
+            },
+            container: {
+              fontSize: "12px",
+              textTransform: "capitalize",
+              borderRadius: "6px",
+            },
+          },
+          grid: {
+            line: {
+              stroke: "#f3f4f6",
+            },
+          },
+        }}
+        role="application"
+      />
+    </div>
+  );
+}
+
+function TrashIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    </svg>
+  );
+}
