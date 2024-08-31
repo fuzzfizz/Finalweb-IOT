@@ -177,6 +177,7 @@ export default function Page() {
       console.log("Received recent update:", data);
     };
     const intervalId = setInterval(() => {
+      fetchData();
       getAllData();
     }, 10000); // 10 seconds
 
