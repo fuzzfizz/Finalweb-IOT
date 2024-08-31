@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, SVGProps } from "react";
+import React, { useState, useEffect, SVGProps, useRef } from "react";
 import {
   Card,
   CardHeader,
@@ -51,6 +51,55 @@ export default function Page() {
   const [sensorData, setSensorData] = useState<ATH034[]>([]);
   const [recentData, setRecentData] = useState<ATH034[]>([]);
   const [volume, setVolume] = useState<number>(50);
+  const [data, setData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "MQ2 Value",
+        data: [],
+        fill: false,
+        borderColor: "rgba(75,192,192,1)",
+        tension: 0.1,
+      },
+    ],
+  });
+
+  const chartRef = useRef(null);
+
+  async function fetchData() {
+    const result = await API.get("/api/fetch");
+    const sortedSensorData = result.data.result.sort(
+      (a: { id: number }, b: { id: number }) => a.id - b.id
+    );
+
+    const mq2Values = sortedSensorData.map(
+      (data: { mq2_value: any }) => data.mq2_value ?? 0
+    );
+    const timestamps = sortedSensorData.map(
+      (data: { time: string | number | Date }) =>
+        data.time
+          ? new Date(data.time).toLocaleTimeString("th-TH", {
+              timeZone: "Asia/Bangkok",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          : ""
+    );
+
+    setData({
+      labels: timestamps,
+      datasets: [
+        {
+          label: "MQ2 Value",
+          data: mq2Values,
+          fill: false,
+          borderColor: "rgba(75,192,192,1)",
+          tension: 0.1,
+        },
+      ],
+    });
+  }
 
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0]); // Slider returns an array, so we use the first value
@@ -69,16 +118,6 @@ export default function Page() {
     try {
       const res = await API.get("/api/fetch");
       setSensorData(res.data.result);
-      console.log(res.data.result);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
-
-  async function getRecentData() {
-    try {
-      const res = await API.get("/api/fetch");
-      setRecentData(res.data.result);
       console.log(res.data.result);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -108,54 +147,41 @@ export default function Page() {
     }
   };
 
-  async function fetchData() {
-    await fetch(
-      "https://474f-2001-44c8-45d0-ac46-9016-ec83-a61d-c977.ngrok-free.app"
-    )
-      .then(() => {
-        // หลังจาก request สำเร็จแล้วจึงเชื่อมต่อกับ WebSocket ที่ path `/sensors`
-        const socket = new WebSocket(
-          "wss://474f-2001-44c8-45d0-ac46-9016-ec83-a61d-c977.ngrok-free.app/sensors"
-        );
-
-        socket.onopen = () => {
-          console.log("WebSocket connection established");
-        };
-
-        socket.onmessage = function (event: MessageEvent) {
-          const data = JSON.parse(
-            event.data.replace(/"rgb":\s*(\w+)/g, '"rgb": "$1"')
-          );
-          // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
-          const formattedData: ATH034 = {
-            id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
-            flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
-            mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
-            rgb_status: data.flame === 0 ? "red" : "green",
-            buzzer_value: new Decimal(data.buzzer), // แปลงค่าเป็น Decimal
-            date: new Date(),
-            time: null,
-          };
-          setRecentData([formattedData]);
-          console.log("Received recent update:", data);
-        };
-
-        socket.onerror = (error) => {
-          console.error("WebSocket error:", error);
-        };
-
-        socket.onclose = () => {
-          console.log("WebSocket connection closed");
-        };
-      })
-      .catch((error) => {
-        console.error("Error connecting to the server:", error);
-      });
-  }
-
   useEffect(() => {
-    fetchData();
     getAllData();
+    fetchData();
+
+    const socket = new WebSocket(
+      "wss://474f-2001-44c8-45d0-ac46-9016-ec83-a61d-c977.ngrok-free.app/sensors"
+    );
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = function (event: MessageEvent) {
+      const data = JSON.parse(
+        event.data.replace(/"rgb":\s*(\w+)/g, '"rgb": "$1"')
+      );
+      // สมมติว่าโครงสร้างข้อมูลที่ได้รับจาก WebSocket ตรงกับโครงสร้างที่คุณต้องการใช้ใน recentData
+      const formattedData: ATH034 = {
+        id: Date.now(), // ใช้ timestamp เป็น id ชั่วคราว
+        flame_status: new Decimal(data.flame), // แปลงค่าเป็น Decimal
+        mq2_value: new Decimal(data.gas_level), // แปลงค่าเป็น Decimal
+        rgb_status: data.flame === 0 ? "red" : "green",
+        buzzer_value: new Decimal(data.buzzer), // แปลงค่าเป็น Decimal
+        date: new Date(),
+        time: null,
+      };
+      setRecentData([formattedData]);
+      console.log("Received recent update:", data);
+    };
+    const intervalId = setInterval(() => {
+      getAllData();
+    }, 10000); // 10 seconds
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const isActive = (status: Decimal | number | null) => {
@@ -168,43 +194,11 @@ export default function Page() {
     return false;
   };
 
-  const isฺBuz = (status: Decimal | number | null) => {
-    if (status instanceof Decimal) {
-      return status.toNumber() === 0;
-    }
-    if (typeof status === "number") {
-      return status === 0;
-    }
-    return false;
-  };
-
-  const sortedSensorData = sensorData.sort((a, b) => a.id - b.id);
-
-  // Then map the sorted data to extract mq2_value and timestamps
-  const mq2Values = sortedSensorData.map((data) => data.mq2_value ?? 0);
-  const timestamps = sortedSensorData.map((data) =>
-    data.time
-      ? new Date(data.time).toLocaleTimeString("th-TH", {
-          timeZone: "Asia/Bangkok",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      : ""
-  );
-
-  // Prepare the data object for Chart.js or any other visualization library
-  const data = {
-    labels: timestamps,
-    datasets: [
-      {
-        label: "MQ2 Value",
-        data: mq2Values,
-        fill: false,
-        borderColor: "rgba(75,192,192,1)",
-        tension: 0.1,
-      },
-    ],
+  const options = {
+    animation: {
+      duration: 0,
+    },
+    // other chart options
   };
 
   return (
@@ -247,7 +241,7 @@ export default function Page() {
                   <h3 className="text-2xl font-medium">
                     Current Smoke Sensor Reading
                   </h3>
-                  <Line data={data} />
+                  <Line ref={chartRef} data={data} options={options} />
                   <div className="flex items-center gap-2">
                     <div className="text-4xl font-bold">
                       {recentData[0]?.mq2_value?.toString() ||
