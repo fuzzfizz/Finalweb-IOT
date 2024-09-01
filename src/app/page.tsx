@@ -152,7 +152,7 @@ export default function Page() {
     fetchData();
 
     const socket = new WebSocket(
-      "wss://474f-2001-44c8-45d0-ac46-9016-ec83-a61d-c977.ngrok-free.app/sensors"
+      "wss://fbd8-2001-44c8-45d0-ac46-2491-a46d-817d-d2be.ngrok-free.app/sensors"
     );
 
     socket.onopen = () => {
@@ -217,7 +217,7 @@ export default function Page() {
         <div className="grid gap-6">
           <Card>
             {recentData[0]?.flame_status?.equals(0) ? (
-              <CardHeader className=" text-white">
+              <CardHeader className="bg-red-500 text-white">
                 <CardTitle>Fire Incident Detected!</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <FlameIcon className="h-5 w-5 text-white" />
@@ -237,12 +237,17 @@ export default function Page() {
               <div className="grid gap-4">
                 <div>
                   <h3 className="text-xl font-medium">Smoke Sensor Data</h3>
+                  <Line
+                    ref={chartRef}
+                    data={data}
+                    options={options}
+                    height={100}
+                  />
                 </div>
                 <div className="mt-3" key={recentData[0]?.id}>
                   <h3 className="text-2xl font-medium">
                     Current Smoke Sensor Reading
                   </h3>
-                  <Line ref={chartRef} data={data} options={options} />
                   <div className="flex items-center gap-2">
                     <div className="text-4xl font-bold">
                       {recentData[0]?.mq2_value?.toString() ||
@@ -256,7 +261,7 @@ export default function Page() {
                     <Slider
                       id="volume"
                       min={0}
-                      max={65535}
+                      max={40000}
                       defaultValue={[30000]} // Provide a default value of 0 if the buzzer_value is undefined
                       className="flex-1"
                       onValueChange={handleVolumeChange} // Update state on slider change
