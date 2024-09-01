@@ -152,14 +152,23 @@ export default function Page() {
     fetchData();
 
     const socket = new WebSocket(
-      "wss://fbd8-2001-44c8-45d0-ac46-2491-a46d-817d-d2be.ngrok-free.app/sensors"
+      "wss://4459-2001-44c8-45d0-ac46-1075-8322-5d92-194d.ngrok-free.app/sensors"
     );
 
     socket.onopen = () => {
       console.log("WebSocket connection established");
     };
 
+    let lastMessageTime = 0;
+
     socket.onmessage = function (event: MessageEvent) {
+      const currentTime = Date.now();
+      if (currentTime - lastMessageTime < 1000) {
+        // If the last message was received less than 1 second ago, ignore this message
+        return;
+      }
+      lastMessageTime = currentTime;
+
       const data = JSON.parse(
         event.data.replace(/"rgb":\s*(\w+)/g, '"rgb": "$1"')
       );
@@ -185,21 +194,30 @@ export default function Page() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const isActive = (status: Decimal | number | null) => {
-    if (status instanceof Decimal) {
-      return status.toNumber() === 0;
-    }
-    if (typeof status === "number") {
-      return status === 0;
-    }
-    return false;
-  };
-
   const options = {
     animation: {
       duration: 0,
     },
     // other chart options
+  };
+
+  const renderFlameStatus = (flameStatus: any) => {
+    const status = Number(flameStatus); // Convert to number if necessary
+    if (status === 0) {
+      return (
+        <div className="flex items-center gap-2 text-red-500">
+          <FlameIcon className="h-4 w-4" />
+          <span>Active</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-2 text-green-500">
+          <CheckIcon className="h-4 w-4" />
+          <span>Resolved</span>
+        </div>
+      );
+    }
   };
 
   return (
@@ -297,17 +315,7 @@ export default function Page() {
                                 {data?.mq2_value?.toString()}
                               </TableCell>
                               <TableCell>
-                                {isActive(data?.flame_status) ? (
-                                  <div className="flex items-center gap-2 text-red-500">
-                                    <FlameIcon className="h-4 w-4" />
-                                    <span>Active</span>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2 text-green-500">
-                                    <CheckIcon className="h-4 w-4" />
-                                    <span>Resolved</span>
-                                  </div>
-                                )}
+                                {renderFlameStatus(data?.flame_status)}
                               </TableCell>
                               <TableCell>{data?.rgb_status}</TableCell>
                               <TableCell>
