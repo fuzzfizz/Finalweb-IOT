@@ -152,7 +152,7 @@ export default function Page() {
     fetchData();
 
     const socket = new WebSocket(
-      "wss://4459-2001-44c8-45d0-ac46-1075-8322-5d92-194d.ngrok-free.app/sensors"
+      "wss://b6af-2001-44c8-4877-46aa-905c-d4a2-9076-c073.ngrok-free.app/sensors"
     );
 
     socket.onopen = () => {

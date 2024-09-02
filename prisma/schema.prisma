@@ -10,259 +10,46 @@ datasource db {
 model ATH034 {
   id           Int       @id @default(autoincrement())
   time         DateTime? @default(now()) @db.Time(6)
+  date         DateTime? @default(now()) @db.Timestamp(6)
   mq2_value    Decimal?  @db.Decimal(10, 0)
   rgb_status   String?   @db.VarChar(10)
   buzzer_value Decimal?  @db.Decimal(10, 0)
   flame_status Decimal?  @db.Decimal(10, 0)
-  date         DateTime? @default(now()) @db.Timestamp(6)
 }
 
-model NRD012 {
-  id       Int       @id @default(autoincrement())
-  ldr      Int?
-  vr       Int?
-  temp     Decimal?  @db.Decimal
-  distance Decimal?  @db.Decimal
-  date     DateTime? @default(now()) @db.Timestamp(6)
-  command  String?   @db.VarChar(10)
-  att      Decimal?  @db.Decimal
+model location {
+  location_id        Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(255)
+  latitude           Decimal?             @db.Decimal(10, 7)
+  longitude          Decimal?             @db.Decimal(10, 7)
+  altitude           Decimal?             @db.Decimal(7, 2)
+  weatherforecast    weatherforecast[]
+  weathermeasurement weathermeasurement[]
 }
 
-model PHU021 {
-  Date           DateTime? @default(now()) @db.Timestamp(6)
-  ultrasonic     String?   @db.VarChar(10)
-  led_ultrasonic String?   @db.VarChar(10)
-  ldr            String?   @db.VarChar(10)
-  led_ldr_pin    String?   @db.VarChar(10)
-  led_status     Int?
-  id             Int       @id @default(autoincrement())
+model weatherforecast {
+  forecast_id     Int       @id @default(autoincrement())
+  location_id     Int
+  tempmax         Decimal   @db.Decimal(5, 2)
+  rainfall_amount Decimal   @db.Decimal(5, 2)
+  tempmin         Decimal   @db.Decimal(5, 2)
+  timestamp       DateTime? @default(now()) @db.Timestamp(6)
+  location        location  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model CCW043 {
-  id                 Int       @id @default(autoincrement())
-  red                Decimal?  @db.Decimal
-  green              Decimal?  @db.Decimal
-  blue               Decimal?  @db.Decimal
-  mode               Decimal?  @db.Decimal
-  status_led         String?   @db.VarChar
-  neo_pixel_duration Decimal?  @db.Decimal
-  updated            DateTime? @default(now()) @db.Timestamp(6)
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model CNS075 {
-  id        Int
-  date_Time DateTime? @default(now()) @map("date Time") @db.Time(6)
-
-  @@ignore
-}
-
-model PHUW022 {
-  id               Int      @id(map: "led_states_pkey") @default(autoincrement())
-  lux              Decimal? @db.Decimal
-  temperature      Decimal? @db.Decimal
-  raindrop_status  String?  @db.VarChar
-  raindrop_value   Decimal? @db.Decimal
-  vibration_status String?  @db.VarChar
-  timestamp        DateTime @default(now()) @db.Timestamptz(6)
-  command          String?  @db.VarChar
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model TR000 {
-  id         Int       @default(autoincrement())
-  ldr        Decimal?  @db.Decimal(5, 2)
-  vr         Decimal?  @db.Decimal(5, 2)
-  temp       Decimal?  @db.Decimal(5, 2)
-  distance   Decimal?  @db.Decimal(5, 2)
-  updated    DateTime? @default(now()) @db.Timestamp(6)
-  status_led String?   @db.VarChar(5)
-  red        Decimal?  @db.Decimal
-  green      Decimal?  @db.Decimal
-  blue       Decimal?  @db.Decimal
-  mode       Decimal?  @db.Decimal
-
-  @@ignore
-}
-
-model TSN008 {
-  id            Int     @id @default(autoincrement())
-  tbl_smoke     Int?
-  tbl_ldr       Int?
-  tbl_vibration Int?
-  tbl_led       Int?
-  status        String? @db.VarChar(10)
-}
-
-model WRP025 {
-  id                     Int       @id @default(autoincrement())
-  timestamp              DateTime? @default(now()) @db.Timestamp(6)
-  total_detected         Int?
-  most_detected_angle    String?   @db.VarChar
-  most_detected_distance String?   @db.VarChar
-  temp                   Decimal?  @db.Decimal
-}
-
-model sensor_data {
-  id        Int       @id @default(autoincrement())
-  sensor    String?   @db.VarChar(50)
-  status    String?   @db.VarChar(50)
-  timestamp DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model tbl_users {
-  id   BigInt  @id
-  name String? @db.Char
-}
-
-model ATP037 {
-  id         Int       @id(map: "ATP 037_pkey") @default(autoincrement())
-  date       DateTime? @default(now()) @db.Timestamptz(6)
-  ldr        String?   @db.VarChar
-  vibration  String?   @db.VarChar
-  ultrasonic String?   @db.VarChar
-  red        String?   @db.VarChar(10)
-  green      String?   @db.VarChar(10)
-}
-
-model Anr035 {
-  id         Int  @id
-  tbl_led    Int?
-  tbl_motor  Int?
-  tbl_var    Int?
-  tbl_switch Int?
-}
-
-model BO013 {
-  id         Int       @id @default(autoincrement())
-  Date_time  DateTime? @default(now()) @db.Timestamp(6)
-  ultrasonic String?   @db.VarChar(50)
-  buzzer     String?   @db.VarChar(50)
-  led        String?   @db.VarChar(50)
-}
-
-model CHANS004 {
-  id          Int       @id @default(autoincrement())
-  date        DateTime? @default(now()) @db.Timestamptz(6)
-  red         String?   @db.VarChar(10)
-  green       String?   @db.VarChar(10)
-  ultrasonic  String?   @db.VarChar
-  temperature String?   @db.VarChar
-  humidity    String?   @db.VarChar
-  status      String?   @db.VarChar
-}
-
-model CYD042 {
-  id       Int       @id @default(autoincrement())
-  ldr      Int?
-  vr       Int?
-  temp     Decimal?  @db.Decimal
-  distance Decimal?  @db.Decimal
-  date     DateTime? @default(now()) @db.Timestamptz(6)
-  command  String?   @db.VarChar(10)
-  att      Decimal?  @db.Decimal
-}
-
-model NUT006 {
-  id          Int     @id
-  ultrasonic  String? @db.VarChar
-  yellow      String? @db.VarChar
-  blue        String? @db.VarChar
-  humidity    String? @db.VarChar
-  temperature String? @db.VarChar
-  LDR         String? @db.VarChar
-  status      Int?
-}
-
-model Pp058 {
-  id       Int       @id
-  ldr      Int?
-  vr       Int?
-  temp     Int?
-  distance Decimal?  @db.Decimal
-  data     DateTime? @db.Timestamp(6)
-  command  String?   @db.VarChar(10)
-  att      Decimal?  @db.Decimal
-}
-
-model RTW024 {
-  id          Int     @id @default(autoincrement())
-  ultrasonic  String? @db.VarChar
-  yellow      String? @db.VarChar
-  blue        String? @db.VarChar
-  humidity    String? @db.VarChar
-  temperature String? @db.VarChar
-  LDR         String? @db.VarChar
-  status      Int?
-}
-
-model S029 {
-  id          Int     @id @default(autoincrement())
-  ultrasonic  String? @db.VarChar
-  yellow      String? @db.VarChar
-  blue        String? @db.VarChar
-  humidity    String? @db.VarChar
-  temperature String? @db.VarChar
-  LDR         String? @db.VarChar
-  status      Int?
-}
-
-model STT030 {
-  id         Int       @id @default(autoincrement())
-  temp       Decimal?  @db.Decimal
-  status     Boolean?
-  timestamp  DateTime? @default(now()) @db.Timestamp(6)
-  system_on  Boolean?  @default(true)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model VIP027 {
-  id         Int       @id @default(autoincrement())
-  SANG       Decimal?  @db.Decimal
-  UNP        Decimal?  @db.Decimal
-  SANG_LED   Decimal?  @db.Decimal
-  Date       DateTime? @default(now()) @db.Timestamp(6)
-  UNP_LED    Decimal?  @db.Decimal
-  LED_Status Decimal?  @db.Decimal
-}
-
-model WCY026 {
-  id        Int       @id @default(autoincrement())
-  timestamp DateTime? @default(now()) @db.Timestamp(6)
-  ldr       Int?
-  led1      Boolean?
-  led2      Boolean?
-  potentio  Int?
-  power     Boolean?
-}
-
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-// model mongkol023 {
-// }
-
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-// model opp003 {
-// }
-
-model pakin019 {
-  id                         Int       @id @default(autoincrement())
-  Moisture_Sensor            String?   @map("Moisture Sensor") @db.VarChar
-  Sensors_Modules_Pir_Sensor String?   @map("Sensors Modules Pir Sensor") @db.VarChar
-  led                        String?   @db.VarChar(50)
-  date                       DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model srh031 {
-  Id         Int  @id
-  tbl_Us     Int?
-  tbl_led    Int?
-  tbl_switch Int?
-  tbl_BZ     Int?
-}
-
-model tbl_Panudetingai020 {
-  id               Int      @id @default(autoincrement())
-  buzzer_value     Int?
-  ultrasonic_value Decimal? @db.Decimal
-  switch_status    String?
+model weathermeasurement {
+  measurement_id  Int       @id @default(autoincrement())
+  location_id     Int
+  wind_speed      Decimal?  @db.Decimal(10, 2)
+  temperature     Decimal?  @db.Decimal(10, 2)
+  humidity        Decimal?  @db.Decimal(10, 2)
+  uv_index        Decimal?  @db.Decimal(10, 2)
+  rainfall_amount Decimal?  @db.Decimal(10, 2)
+  pm25_value      Decimal?  @db.Decimal(10, 2)
+  pm10_value      Decimal?  @db.Decimal(10, 2)
+  pm1_value       Decimal?  @db.Decimal(10, 2)
+  pressure        Decimal?  @db.Decimal(10, 2)
+  altitude        Decimal?  @db.Decimal(10, 2)
+  timestamp       DateTime? @default(now()) @db.Timestamp(6)
+  location        location  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
 }
